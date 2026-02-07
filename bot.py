@@ -1,7 +1,7 @@
+import os
 import asyncio
 import logging
 import json
-import os
 from typing import Optional, Dict, Any, Tuple
 from datetime import datetime, timedelta
 from collections import defaultdict
@@ -20,8 +20,13 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Токен вашего бота
-BOT_TOKEN = "YOUR_BOT_TOKEN_HERE"
+# Получаем токен из переменных окружения
+BOT_TOKEN = os.environ.get('BOT_TOKEN')
+
+if not BOT_TOKEN:
+    logger.error("❌ BOT_TOKEN не установлен!")
+    logger.error("Установите переменную окружения BOT_TOKEN")
+    exit(1)
 
 # Состояния для ConversationHandler
 SET_BASE_CURRENCY, SET_AMOUNT = range(2)
@@ -197,7 +202,7 @@ class CurrencyBot:
     async def search_currency(self, query: str) -> Dict[str, str]:
         """Поиск валюты по названию или коду"""
         query = query.upper().strip()
-        all_currencies = await self.get_all_currencies()
+        all_currencies = await bot.get_all_currencies()
         
         results = {}
         
@@ -852,18 +857,8 @@ def main() -> None:
     application.add_error_handler(error_handler)
     
     # Запускаем бота
-    print("🚀 Бот запущен! Нажмите Ctrl+C для остановки.")
+    logger.info("🚀 Бот запускается...")
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 if __name__ == '__main__':
-    # Получаем токен бота
-    BOT_TOKEN = input("Введите токен вашего бота от @BotFather: ").strip()
-    
-    if not BOT_TOKEN or BOT_TOKEN == "YOUR_BOT_TOKEN_HERE":
-        print("❌ Пожалуйста, укажите действительный токен бота!")
-        print("\n📝 Как получить токен:")
-        print("1. Найдите @BotFather в Telegram")
-        print("2. Отправьте /newbot и следуйте инструкциям")
-        print("3. Скопируйте полученный токен")
-    else:
-        main()
+    main()
